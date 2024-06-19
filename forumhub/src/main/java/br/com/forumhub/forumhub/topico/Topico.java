@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Table(name = "topicos")
 @Entity(name = "Topico")
 @Getter
@@ -22,11 +24,29 @@ public class Topico {
     private String mensagem;
     private String autor;
     private String curso;
+    private Boolean estadoDoTopico;
+    private LocalDateTime dataCriacao = LocalDateTime.now();
 
     public Topico(DadosCadastroTopico dadosCadastroTopico) {
+        this.estadoDoTopico = true;
         this.titulo = dadosCadastroTopico.titulo();
         this.mensagem = dadosCadastroTopico.mensagem();
         this.autor = dadosCadastroTopico.autor();
         this.curso = dadosCadastroTopico.curso();
+    }
+
+    public void atualizar(DadosAtualizarTopico dadosAtualizarTopico) {
+        if(dadosAtualizarTopico.titulo() != null) {
+            this.titulo = dadosAtualizarTopico.titulo();
+        }
+
+        if(dadosAtualizarTopico.mensagem() != null) {
+            this.mensagem = dadosAtualizarTopico.mensagem();
+        }
+
+        if(dadosAtualizarTopico.curso() != null) {
+            this.curso = dadosAtualizarTopico.curso();
+        }
+
     }
 }
