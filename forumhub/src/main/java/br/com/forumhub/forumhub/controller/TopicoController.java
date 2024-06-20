@@ -1,5 +1,7 @@
 package br.com.forumhub.forumhub.controller;
 
+import br.com.forumhub.forumhub.domain.usuario.Usuario;
+import br.com.forumhub.forumhub.domain.usuario.UsuarioRepository;
 import br.com.forumhub.forumhub.topico.*;
 import jakarta.validation.Valid;
 import org.flywaydb.core.Flyway;
@@ -8,6 +10,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +26,15 @@ public class TopicoController {
     @Autowired
     private TopicoRepository topicoRepository;
 
+    @Autowired
+    UsuarioRepository usuarioRepository;
+
     @PostMapping
     @Transactional
     public void cadastrar(@RequestBody @Valid DadosCadastroTopico dadosCadastroTopico){
-        topicoRepository.save(new Topico(dadosCadastroTopico));
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Usuario autor = (Usuario) usuarioRepository.findByLogin(userDetails.getUsername());
+        topicoRepository.save(new Topico(dadosCadastroTopico, autor));
 
     }
 
@@ -49,7 +60,15 @@ public class TopicoController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void excluir(@PathVariable Long id){
+    public ResponseEntity<?> excluir(@PathVariable Long id){
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Topico topico = topicoRepository.findById(id).orElseThrow();
+
+        if (!topico.getAutor().equals(userDetails.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para excluir este tópico");
+        }
+
         topicoRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }

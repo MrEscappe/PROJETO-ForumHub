@@ -1,6 +1,7 @@
 package br.com.forumhub.forumhub.topico;
 
 
+import br.com.forumhub.forumhub.domain.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -27,13 +28,14 @@ public class Topico {
     private Boolean estadoDoTopico;
     private LocalDateTime dataCriacao = LocalDateTime.now();
 
-    public Topico(DadosCadastroTopico dadosCadastroTopico) {
+    public Topico(DadosCadastroTopico dadosCadastroTopico, Usuario autor) {
         this.estadoDoTopico = true;
         this.titulo = dadosCadastroTopico.titulo();
         this.mensagem = dadosCadastroTopico.mensagem();
-        this.autor = dadosCadastroTopico.autor();
+        this.autor = autor.getLogin();
         this.curso = dadosCadastroTopico.curso();
     }
+
 
     public void atualizar(DadosAtualizarTopico dadosAtualizarTopico) {
         if(dadosAtualizarTopico.titulo() != null) {
